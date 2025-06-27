@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <title>YouTube Sesli Oynatma - Özel Kontrol</title>
+  <style>
+    body { font-family: Arial; padding: 20px; }
+    input { width: 300px; padding: 10px; margin-right: 10px; }
+    .video-card {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-bottom: 15px;
+      max-width: 400px;
+    }
+    .thumbnail {
+      width: 100%;
+      margin-bottom: 8px;
+      cursor: pointer;
+    }
+    button, input[type=range] {
+      margin-top: 10px;
+      padding: 8px 12px;
+    }
+    input[type=range] {
+      width: 100%;
+      margin-top: 10px;
+    }
+    #results {
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>YouTube Sesli Oynatma</h1>
+  <input type="text" id="searchInput" placeholder="Video ara..." />
+  <button onclick="searchYouTube()">Ara</button>
+
+  <div id="results"></div>
+
+  <script src="https://www.youtube.com/iframe_api"></script>
+
+  <script>
+    const apiKey = 'AIzaSyDwsWhc_oGVd0juTa8DZTeKGJwnoEQn0CE'; // Kendi API anahtarını kullan
+    let players = []; // Player nesneleri burada tutulacak
+
+    function stopAllVideos() {
+      players.forEach(p => {
+        if (p.player && p.player.pauseVideo) {
+          p.player.pauseVideo();
+          p.button.textContent = 'Devam Ettir';
+          p.isPlaying = false;
+        }
+      });
+    }
+
+    function searchYouTube() {
+      const query = document.getElementById('searchInput').value.trim();
+      const resultsDiv = document.getElementById('results');
+      if (!query) {
+        resultsDiv.innerHTML = 'Lütfen arama terimi girin.';
+        return;
+      }
+      resultsDiv.innerHTML = 'Yükleniyor...';
+      players = [];
+
+      fetch(`https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=5&key=${apiKey}`)
+        .then(res => res.json())
+        .then(data => {
+          resultsDiv.innerHTML = '';
+          if (!data.items || data.items.length === 0) {
+            resultsDiv.innerHTML = 'Sonuç bulunamadı.';
+            return;
+          }
+
+          data.items.forEach((item, index) => {
+            if (item.id.kind !== 'youtube#video') return;
+
+            const videoId = item.id.videoId;
+            const title = item.snippet.title;
+            const thumbnailUrl = item.snippet.thumbnails.medium.url;
+
+            const card = document.createElement('div');
+            card.className = 'video-card';
+
+            const titleElem = document.createElement('h3');
+            titleElem.textContent = title;
+
+            const thumbnail = document.createElement('img');
+            thumbnail.src = thumbnailUrl;
+            thumbnail.className = 'thumbnail';
+
+            const playerDiv = document.createElement('div');
+            const playerId = `player-${index}`;
+            playerDiv.id = playerId;
+
+            const playBtn = document.createElement('button');
+            playBtn.textContent = 'Devam Ettir';
+
+            const progress = document.createElement('input');
+            progress.type = 'range';
+            progress.min = 0;
+            progress.max = 100;
+            progress.value = 0;
+
+            card.appendChild(titleElem);
+            card.appendChild(thumbnail);
+            card.appendChild(playBtn);
+            card.appendChild(progress);
+            card.appendChild(playerDiv);
+            resultsDiv.appendChild(card);
+
+            const playerObj = { player: null, button: playBtn, isPlaying: false };
+
+            const ytPlayer = new YT.Player(playerId, {
+              height: '1',
+              width: '1',
+              videoId: videoId,
+              playerVars: {
+                controls: 0,
+                modestbranding: 1,
+                autoplay: 0,
+              },
+              events: {
+                onReady: (event) => {
+                  const playerInstance = event.target;
+
+                  // Progress bar güncellemesi için fonksiyon
+                  function updateProgress() {
+                    if (!playerInstance || !playerObj.isPlaying) {
+                        requestAnimationFrame(updateProgress);
+                        return;
+                    }
+                    
+                    const playerState = playerInstance.getPlayerState();
+                    if (playerState === YT.PlayerState.PLAYING) {
+                        const duration = playerInstance.getDuration();
+                        const currentTime = playerInstance.getCurrentTime();
+                        if (duration > 0) {
+                        const percent = (currentTime / duration) * 100;
+                        progress.value = percent;
+                        }
+                    }
+                    requestAnimationFrame(updateProgress);
+                }
+                  updateProgress();
+
+                  progress.addEventListener('input', () => {
+                    const duration = playerInstance.getDuration();
+                    if (duration > 0) {
+                      const seekTime = (progress.value / 100) * duration;
+                      playerInstance.seekTo(seekTime, true);
+                    }
+                  });
+
+                  playBtn.onclick = () => {
+                    if (!playerObj.isPlaying) {
+                      stopAllVideos();
+                      playerInstance.playVideo();
+                      playBtn.textContent = 'Durdur';
+                      playerObj.isPlaying = true;
+                    } else {
+                      playerInstance.pauseVideo();
+                      playBtn.textContent = 'Devam Ettir';
+                      playerObj.isPlaying = false;
+                    }
+                  };
+                }
+              }
+            });
+
+            playerObj.player = ytPlayer;
+            players.push(playerObj);
+          });
+        })
+        .catch(err => {
+          console.error(err);
+          resultsDiv.innerHTML = 'Bir hata oluştu.';
+        });
+    }
+  </script>
+
+</body>
+</html>
