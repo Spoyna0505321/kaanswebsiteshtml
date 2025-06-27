@@ -4,30 +4,122 @@
   <meta charset="UTF-8" />
   <title>YouTube Sesli Oynatma - Özel Kontrol</title>
   <style>
-    body { font-family: Arial; padding: 20px; }
-    input { width: 300px; padding: 10px; margin-right: 10px; }
-    .video-card {
-      border: 1px solid #ccc;
-      padding: 10px;
-      margin-bottom: 15px;
-      max-width: 400px;
+    body {
+    font-family: Arial, sans-serif;
+    padding: 15px;
+    margin: 0;
+    background: #fafafa;
+    color: #222;
     }
-    .thumbnail {
-      width: 100%;
-      margin-bottom: 8px;
-      cursor: pointer;
+
+    h1 {
+    font-size: 1.8rem;
+    margin-bottom: 20px;
+    text-align: center;
     }
-    button, input[type=range] {
-      margin-top: 10px;
-      padding: 8px 12px;
+
+    #searchInput {
+    width: calc(100% - 120px);
+    max-width: 400px;
+    padding: 10px;
+    font-size: 1rem;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    vertical-align: middle;
     }
-    input[type=range] {
-      width: 100%;
-      margin-top: 10px;
+
+    button {
+    padding: 11px 15px;
+    font-size: 1rem;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    cursor: pointer;
+    border-radius: 4px;
+    vertical-align: middle;
+    transition: background-color 0.3s ease;
     }
+
+    button:hover {
+    background-color: #0056b3;
+    }
+
     #results {
-      margin-top: 20px;
+    margin-top: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
     }
+
+    .video-card {
+    background: white;
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 6px rgb(0 0 0 / 0.1);
+    display: flex;
+    flex-direction: column;
+    }
+
+    .video-card h3 {
+    font-size: 1.1rem;
+    margin: 0 0 10px 0;
+    word-break: break-word;
+    }
+
+    button, input[type=range] {
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 8px;
+    border-radius: 5px;
+    }
+
+    input[type=range] {
+    -webkit-appearance: none;
+    height: 6px;
+    background: #ddd;
+    cursor: pointer;
+    margin-top: 12px;
+    }
+
+    input[type=range]::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px;
+    height: 20px;
+    background: #007bff;
+    border-radius: 50%;
+    cursor: pointer;
+    margin-top: -7px;
+    transition: background 0.3s ease;
+    }
+
+    input[type=range]:active::-webkit-slider-thumb {
+    background: #0056b3;
+    }
+
+    @media (max-width: 480px) {
+    #searchInput {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+
+    button {
+        width: 100%;
+    }
+
+    #results {
+        max-width: 100%;
+        padding: 0 10px;
+    }
+
+    .video-card {
+        padding: 12px 10px;
+    }
+    }
+
   </style>
 </head>
 <body>
