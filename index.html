@@ -149,6 +149,17 @@
         }
       });
     }
+    document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        console.log('Sayfa arka planda');
+        // İstersen burada tüm videoları durdurabilirsin:
+        players.forEach(p => { if (p.isPlaying) p.player.playVideo(); });
+    } else {
+        console.log('Sayfa ön planda');
+        // İstersen oynayan videoları devam ettirebilirsin:
+       
+    }
+    });
 
     function searchYouTube() {
       const query = document.getElementById('searchInput').value.trim();
